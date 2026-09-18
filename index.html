@@ -221,6 +221,30 @@
     text-transform:uppercase;
   }
 
+  #boton-fiesta{
+    font-family:'Cinzel',serif;
+    font-weight:700;
+    font-size:clamp(.85rem,3.4vw,1rem);
+    color:var(--dark);
+    background:linear-gradient(135deg,var(--gold),var(--fire));
+    border:none;
+    padding:.85em 1.6em;
+    cursor:pointer;
+    -webkit-clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);
+    clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);
+    box-shadow:0 0 24px rgba(255,140,0,.5);
+    animation:pulso-boton 1.8s ease-in-out infinite;
+  }
+
+  #boton-fiesta:hover{filter:brightness(1.1);}
+
+  #boton-fiesta.oculto{display:none;}
+
+  @keyframes pulso-boton{
+    0%,100%{transform:scale(1);box-shadow:0 0 24px rgba(255,140,0,.5);}
+    50%{transform:scale(1.04);box-shadow:0 0 40px rgba(255,140,0,.8);}
+  }
+
   @media (prefers-reduced-motion: reduce){
     *,*::before,*::after{
       animation-duration:.001ms !important;
@@ -245,6 +269,8 @@
 
   <p class="eyebrow">Transcripción oficial del grito de cumpleaños</p>
 
+  <button id="boton-fiesta" type="button">🎉 Toca para escuchar el grito 🎉</button>
+
   <section class="monologue" aria-label="Grito de cumpleaños">
     <p class="linea grito">¡NOOO! ¿POR QUÉ OTRA VEZ? ¿POR QUÉ EL DESTINO ME HACE ESTO?</p>
     <p class="linea grito alt">¡ESPERA— ESPERA UN SEGUNDO!</p>
@@ -263,6 +289,33 @@
 
   <footer class="sig">🔥 Bestias y Monstruos 🔥</footer>
 </main>
+
+<audio id="reproductor-grito" preload="auto"></audio>
+
+<script>
+  // === 🔊 Reproducción del grito en bucle (Emilia + Subaru) ===
+  const listaAudios = [
+    'audio/emilia-feliz-cumple.mp3',
+    'audio/subaru-parte1.mp3',
+    'audio/subaru-parte2.mp3'
+  ];
+  let indiceAudioActual = 0;
+  const reproductor = document.getElementById('reproductor-grito');
+  const botonFiesta = document.getElementById('boton-fiesta');
+
+  function reproducirSiguienteAudio(){
+    reproductor.src = listaAudios[indiceAudioActual];
+    reproductor.play().catch(err => console.warn('No se pudo reproducir el audio:', err));
+    indiceAudioActual = (indiceAudioActual + 1) % listaAudios.length;
+  }
+
+  reproductor.addEventListener('ended', reproducirSiguienteAudio);
+
+  botonFiesta.addEventListener('click', () => {
+    botonFiesta.classList.add('oculto');
+    reproducirSiguienteAudio();
+  });
+</script>
 
 <script>
   const canvas = document.getElementById('embers');
