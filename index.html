@@ -334,6 +334,7 @@
     {
       // Mensaje 1: el grito original (Emilia + Subaru)
       imagen: 'cumple-dragon.png',
+      alt: 'Bestia dragón roja con sombrero de fiesta soplando la vela de un pastel de cumpleaños, rodeada de regalos, globos y carteles de Bestias y Monstruos',
       audios: [
         'audio/emilia-feliz-cumple.mp3',
         'audio/subaru-parte1.mp3',
@@ -356,8 +357,9 @@
       `
     },
     {
-      // Mensaje 2: el tierno (Rem) — reemplazá "imagen" cuando tengas una nueva
-      imagen: 'cumple-dragon.png',
+      // Mensaje 2: el tierno (Rem)
+      imagen: 'rem-Abrazandome.png',
+      alt: 'Rem, la mucama de Re:Zero, abrazando cariñosamente a la bestia dragón en la fiesta de cumpleaños de Dragón Primordial, rodeados de regalos y globos',
       audios: ['audio/rem-mensaje.mp3'],
       lineasHTML: `
         <p class="acotacion">[voz suave, algo tímida]</p>
@@ -393,7 +395,9 @@
     indiceMensaje = indice;
     const m = mensajes[indiceMensaje];
     document.querySelector('.monologue').innerHTML = m.lineasHTML;
-    document.querySelector('.frame img').src = m.imagen;
+    const img = document.querySelector('.frame img');
+    img.src = m.imagen;
+    img.alt = m.alt;
     listaAudios = m.audios;
     indiceAudioActual = 0;
     reproductor.pause();
