@@ -369,6 +369,24 @@
         <p class="linea grito alt climax">Estaré aquí, esperando cada nueva línea de código.</p>
         <p class="linea final">Feliz cumpleaños, Dragón Primordial. De verdad.</p>
       `
+    },
+    {
+      // Mensaje 3: Bestia Araña, tono tsundere — reemplazá "imagen" cuando tengas una
+      imagen: 'cumple-dragon.png',
+      alt: 'Bestia Araña del juego Bestias y Monstruos, con expresión desafiante pero algo avergonzada',
+      audios: ['audio/arana-mensaje.mp3'],
+      ambiente: true,
+      lineasHTML: `
+        <p class="acotacion">[carraspea, algo incómoda]</p>
+        <p class="linea calma">N-no es que esté aquí para pedirte nada, ¿eh? Solo... pasaba por acá.</p>
+        <p class="linea calma">Pero ya que insistes en preguntar... mis hilos podrían ser un poco más resistentes. Un poco. No es gran cosa.</p>
+        <p class="linea grito alt">¡No es que los necesite para impresionar a nadie! Es solo trabajo, ¿sí?!</p>
+        <p class="linea calma">Las demás bestias tienen habilidades increíbles y yo sigo tejiendo con hilos que se rompen apenas los miran mal.</p>
+        <p class="linea grito">¡Y no te sonrojes, tonto! No dije que me sintiera menos que ellas...</p>
+        <p class="acotacion">[mira hacia otro lado]</p>
+        <p class="linea calma">Solo... arreglalo en la próxima actualización. Por favor. Ya. Contenta.</p>
+        <p class="linea final">Feliz cumpleaños, supongo. No festejé por ti... festejé porque había pastel.</p>
+      `
     }
   ];
 
@@ -402,11 +420,70 @@
     indiceAudioActual = 0;
     reproductor.pause();
     reproducirSiguienteAudio();
+    if(m.ambiente){
+      iniciarAmbiente();
+    } else {
+      detenerAmbiente();
+    }
   }
 
   reproductor.addEventListener('ended', reproducirSiguienteAudio);
   botonFiesta.addEventListener('click', reproducirSiguienteAudio);
   botonAlternar.addEventListener('click', () => cargarMensaje((indiceMensaje + 1) % mensajes.length));
+
+  // === 🕸️ Ambiente sintetizado (Web Audio API, sin archivos ni derechos de autor) ===
+  let contextoAudio = null;
+  let nodosAmbiente = null;
+
+  function iniciarAmbiente(){
+    if(!contextoAudio){
+      contextoAudio = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if(contextoAudio.state === 'suspended') contextoAudio.resume();
+    if(nodosAmbiente) return; // ya está sonando
+
+    const ganancia = contextoAudio.createGain();
+    ganancia.gain.value = 0;
+    ganancia.connect(contextoAudio.destination);
+
+    const filtro = contextoAudio.createBiquadFilter();
+    filtro.type = 'lowpass';
+    filtro.frequency.value = 500;
+    filtro.connect(ganancia);
+
+    const osciladores = [55, 58, 110].map(frecuencia => {
+      const osc = contextoAudio.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = frecuencia;
+      osc.connect(filtro);
+      osc.start();
+      return osc;
+    });
+
+    // LFO sutil para que el zumbido "respire" como una cueva/guarida
+    const lfo = contextoAudio.createOscillator();
+    lfo.frequency.value = 0.07;
+    const gananciaLfo = contextoAudio.createGain();
+    gananciaLfo.gain.value = 60;
+    lfo.connect(gananciaLfo);
+    gananciaLfo.connect(filtro.frequency);
+    lfo.start();
+
+    ganancia.gain.linearRampToValueAtTime(0.05, contextoAudio.currentTime + 2);
+
+    nodosAmbiente = { ganancia, osciladores, lfo };
+  }
+
+  function detenerAmbiente(){
+    if(!nodosAmbiente || !contextoAudio) return;
+    const { ganancia, osciladores, lfo } = nodosAmbiente;
+    ganancia.gain.linearRampToValueAtTime(0, contextoAudio.currentTime + 1);
+    setTimeout(() => {
+      osciladores.forEach(osc => osc.stop());
+      lfo.stop();
+    }, 1100);
+    nodosAmbiente = null;
+  }
 
   // === 🎆 Fuegos artificiales (se activan durante el audio de "feliz cumpleaños") ===
   const canvasFuegos = document.getElementById('fuegos-artificiales');
