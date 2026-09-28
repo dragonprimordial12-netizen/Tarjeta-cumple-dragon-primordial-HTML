@@ -282,10 +282,25 @@
     border-color:var(--gold);
   }
 
+  #transicion{
+    position:fixed;
+    inset:0;
+    z-index:10;
+    pointer-events:none;
+    opacity:0;
+    background:
+      radial-gradient(ellipse at center, rgba(5,3,5,0) 0%, rgba(5,3,5,0.88) 55%, rgba(5,3,5,0.98) 100%),
+      radial-gradient(ellipse at center, transparent 38%, rgba(255,77,0,0.55) 75%, rgba(255,140,0,0.3) 100%);
+    transition:opacity .4s ease;
+  }
+
+  #transicion.activa{ opacity:1; }
+
   @media (prefers-reduced-motion: reduce){
     *,*::before,*::after{
       animation-duration:.001ms !important;
       animation-iteration-count:1 !important;
+      transition-duration:.001ms !important;
     }
     .frame img{box-shadow:0 0 0 1px rgba(0,0,0,.4),0 0 48px rgba(255,140,0,.3);}
   }
@@ -294,6 +309,7 @@
 <body>
 <canvas id="embers"></canvas>
 <canvas id="fuegos-artificiales"></canvas>
+<div id="transicion"></div>
 
 <button id="boton-musica" type="button" title="Silenciar música de fondo">🎵 Música</button>
 <button id="boton-alternar" type="button" title="Cambiar de mensaje">🔄 Otro mensaje</button>
@@ -458,7 +474,29 @@
 
   reproductor.addEventListener('ended', reproducirSiguienteAudio);
   botonFiesta.addEventListener('click', reproducirSiguienteAudio);
-  botonAlternar.addEventListener('click', () => cargarMensaje((indiceMensaje + 1) % mensajes.length));
+
+  // === 🔥 Transición oscura/con fuego al cambiar de mensaje ===
+  let transicionEnCurso = false;
+  function alternarMensaje(){
+    if(transicionEnCurso) return;
+    const nuevoIndice = (indiceMensaje + 1) % mensajes.length;
+
+    if(reducidoMovimiento){
+      cargarMensaje(nuevoIndice);
+      return;
+    }
+
+    transicionEnCurso = true;
+    const overlay = document.getElementById('transicion');
+    overlay.classList.add('activa');
+    setTimeout(() => {
+      cargarMensaje(nuevoIndice);
+      overlay.classList.remove('activa');
+      setTimeout(() => { transicionEnCurso = false; }, 400);
+    }, 400);
+  }
+
+  botonAlternar.addEventListener('click', alternarMensaje);
 
   // === 🕸️ Ambiente sintetizado (Web Audio API, sin archivos ni derechos de autor) ===
   let contextoAudio = null;
