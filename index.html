@@ -255,10 +255,10 @@
     50%{transform:scale(1.04);box-shadow:0 0 40px rgba(255,140,0,.8);}
   }
 
-  #boton-alternar{
+  #boton-alternar,
+  #boton-musica{
     position:fixed;
     top:14px;
-    right:14px;
     z-index:5;
     font-family:'Cinzel',serif;
     font-size:.65rem;
@@ -273,7 +273,11 @@
     transition:color .2s ease, border-color .2s ease;
   }
 
-  #boton-alternar:hover{
+  #boton-alternar{ right:14px; }
+  #boton-musica{ left:14px; }
+
+  #boton-alternar:hover,
+  #boton-musica:hover{
     color:var(--gold);
     border-color:var(--gold);
   }
@@ -291,6 +295,7 @@
 <canvas id="embers"></canvas>
 <canvas id="fuegos-artificiales"></canvas>
 
+<button id="boton-musica" type="button" title="Silenciar música de fondo">🎵 Música</button>
 <button id="boton-alternar" type="button" title="Cambiar de mensaje">🔄 Otro mensaje</button>
 
 <main class="stage">
@@ -327,6 +332,7 @@
 </main>
 
 <audio id="reproductor-grito" preload="auto"></audio>
+<audio id="musica-fondo" src="audio/ambiente-funk.mp3" loop preload="auto"></audio>
 
 <script>
   // === 🎉 Mensajes de cumpleaños (texto + imagen + audio, intercambiables) ===
@@ -371,9 +377,9 @@
       `
     },
     {
-      // Mensaje 3: Bestia Araña, tono tsundere — reemplazá "imagen" cuando tengas una
-      imagen: 'cumple-dragon.png',
-      alt: 'Bestia Araña del juego Bestias y Monstruos, con expresión desafiante pero algo avergonzada',
+      // Mensaje 3: Bestia Araña, tono tsundere (voz: Priscilla Barielle, Fish Audio)
+      imagen: 'arana-tsundere.png',
+      alt: 'Bestia Araña convertida en chica anime de cabello oscuro, con broche de araña y sombrero de fiesta con telaraña, abrazando a la bestia dragón en la fiesta de cumpleaños de Dragón Primordial',
       audios: ['audio/arana-mensaje.mp3'],
       ambiente: true,
       lineasHTML: `
@@ -400,7 +406,30 @@
   const botonAlternar = document.getElementById('boton-alternar');
   const reducidoMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // === 🎵 Música de fondo (ambiente-funk.mp3): arranca con el primer clic y se puede silenciar ===
+  const musicaFondo = document.getElementById('musica-fondo');
+  const botonMusica = document.getElementById('boton-musica');
+  musicaFondo.volume = 0.18;
+  let musicaIniciada = false;
+  let musicaSilenciada = false;
+  let volumenMusicaPrevio = 0.18;
+
+  function iniciarMusicaFondo(){
+    if(musicaIniciada) return;
+    musicaIniciada = true;
+    musicaFondo.play().catch(err => console.warn('No se pudo iniciar la música de fondo:', err));
+  }
+
+  function alternarMusica(){
+    musicaSilenciada = !musicaSilenciada;
+    musicaFondo.muted = musicaSilenciada;
+    botonMusica.textContent = musicaSilenciada ? '🔇 Música' : '🎵 Música';
+    botonMusica.title = musicaSilenciada ? 'Activar música de fondo' : 'Silenciar música de fondo';
+  }
+  botonMusica.addEventListener('click', alternarMusica);
+
   function reproducirSiguienteAudio(){
+    iniciarMusicaFondo();
     botonFiesta.classList.add('oculto');
     const pista = listaAudios[indiceAudioActual];
     reproductor.src = pista;
@@ -440,6 +469,14 @@
       contextoAudio = new (window.AudioContext || window.webkitAudioContext)();
     }
     if(contextoAudio.state === 'suspended') contextoAudio.resume();
+
+    // Baja la música de fondo mientras dura el zumbido de la guarida, para que no compitan
+    if(!musicaFondo.paused && !musicaFondo.dataset.enDucking){
+      volumenMusicaPrevio = musicaFondo.volume;
+      musicaFondo.volume = 0.04;
+      musicaFondo.dataset.enDucking = '1';
+    }
+
     if(nodosAmbiente) return; // ya está sonando
 
     const ganancia = contextoAudio.createGain();
@@ -475,6 +512,12 @@
   }
 
   function detenerAmbiente(){
+    // Devuelve la música de fondo a su volumen normal
+    if(musicaFondo.dataset.enDucking){
+      musicaFondo.volume = volumenMusicaPrevio;
+      delete musicaFondo.dataset.enDucking;
+    }
+
     if(!nodosAmbiente || !contextoAudio) return;
     const { ganancia, osciladores, lfo } = nodosAmbiente;
     ganancia.gain.linearRampToValueAtTime(0, contextoAudio.currentTime + 1);
