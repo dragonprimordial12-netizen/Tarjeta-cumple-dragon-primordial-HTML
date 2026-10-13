@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>¡Feliz Cumpleaños Dragón Primordial!</title>
+<meta name="description" content="Un mensaje de cumpleaños para Dragón Primordial, gritado (y susurrado) por sus propias bestias.">
+<meta property="og:title" content="🎂 ¡Feliz Cumpleaños Dragón Primordial!">
+<meta property="og:description" content="Cuatro bestias, cuatro voces y un solo cumpleaños. Toca para escuchar.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://dragonprimordial12-netizen.github.io/Tarjeta-cumple-dragon-primordial-HTML/cumple-dragon.png">
+<meta property="og:url" content="https://dragonprimordial12-netizen.github.io/Tarjeta-cumple-dragon-primordial-HTML/">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@400;700;900&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
@@ -400,6 +407,19 @@
     cursor:wait;
   }
 
+  /* === 📸 Modo captura: congela animaciones y muestra todo el texto mientras se genera la imagen === */
+  body.capturando *,
+  body.capturando *::before,
+  body.capturando *::after{
+    animation:none !important;
+    transition:none !important;
+  }
+
+  body.capturando .linea-oculta{
+    opacity:1 !important;
+    transform:none !important;
+  }
+
   #transicion{
     position:fixed;
     inset:0;
@@ -447,9 +467,9 @@
     <img src="cumple-dragon.png" alt="Bestia dragón roja con sombrero de fiesta soplando la vela de un pastel de cumpleaños, rodeada de regalos, globos y carteles de Bestias y Monstruos">
   </figure>
 
-  <p class="eyebrow">Transcripción oficial del grito de cumpleaños</p>
+  <p id="eyebrow" class="eyebrow">Transcripción oficial del grito de cumpleaños</p>
 
-  <button id="boton-fiesta" type="button">🎉 Toca para escuchar el grito 🎉</button>
+  <button id="boton-fiesta" type="button" data-html2canvas-ignore="true">🎉 Toca para escuchar el grito 🎉</button>
 
   <section class="monologue" aria-label="Grito de cumpleaños">
     <p class="linea grito">¡NOOO! ¿POR QUÉ OTRA VEZ? ¿POR QUÉ EL DESTINO ME HACE ESTO?</p>
@@ -467,9 +487,9 @@
     <p class="linea final">Que vivas mil años más creando bestias.</p>
   </section>
 
-  <div id="puntos-mensaje" class="puntos-mensaje" role="tablist" aria-label="Selector de mensaje"></div>
+  <div id="puntos-mensaje" class="puntos-mensaje" role="group" aria-label="Selector de mensaje" data-html2canvas-ignore="true"></div>
 
-  <div class="acciones-tarjeta">
+  <div class="acciones-tarjeta" data-html2canvas-ignore="true">
     <button id="boton-compartir" type="button" title="Copiar link de este mensaje">🔗 Copiar link</button>
     <button id="boton-descargar" type="button" title="Descargar la tarjeta como imagen">📸 Descargar imagen</button>
   </div>
@@ -489,6 +509,7 @@
       // Mensaje 1: el grito original (Emilia + Subaru)
       id: 'grito',
       personaje: 'Emilia & Subaru',
+      eyebrow: 'Transcripción oficial del grito de cumpleaños',
       imagen: 'cumple-dragon.png',
       alt: 'Bestia dragón roja con sombrero de fiesta soplando la vela de un pastel de cumpleaños, rodeada de regalos, globos y carteles de Bestias y Monstruos',
       audios: [
@@ -516,6 +537,7 @@
       // Mensaje 2: el tierno (Rem)
       id: 'rem',
       personaje: 'Rem',
+      eyebrow: 'Mensaje de Rem para el Dragón',
       imagen: 'rem-Abrazandome.png',
       alt: 'Rem, la mucama de Re:Zero, abrazando cariñosamente a la bestia dragón en la fiesta de cumpleaños de Dragón Primordial, rodeados de regalos y globos',
       audios: ['audio/rem-mensaje.mp3'],
@@ -532,6 +554,7 @@
       // Mensaje 3: Bestia Araña, tono tsundere (voz: Priscilla Barielle, Fish Audio)
       id: 'arana',
       personaje: 'Bestia Araña',
+      eyebrow: 'Confesión de la Bestia Araña (no la juzgues)',
       imagen: 'arana-tsundere.png',
       alt: 'Bestia Araña convertida en chica anime de cabello oscuro, con broche de araña y sombrero de fiesta con telaraña, abrazando a la bestia dragón en la fiesta de cumpleaños de Dragón Primordial',
       audios: ['audio/arana-mensaje.mp3'],
@@ -549,22 +572,23 @@
       `
     },
     {
-      // Mensaje 4: Bestia León, tono orgulloso/regio
-      // Elegí vos la voz en Fish Audio: algo grave, con porte de rey — texto original, sin atarlo a ningún personaje puntual.
+      // Mensaje 4: Bestia León (chica), tono orgulloso/regio
+      // Voz sugerida en Fish Audio: femenina, firme y segura, con porte de reina. Pega en el generador solo el texto hablado (sin los [corchetes]).
       id: 'leon',
       personaje: 'Bestia León',
+      eyebrow: 'Decreto real de la Bestia León',
       imagen: 'leon-rey.png',
-      alt: 'Bestia León con melena dorada y una corona improvisada de fiesta, posando con actitud orgullosa junto a la bestia dragón en el cumpleaños de Dragón Primordial, rodeados de regalos y globos',
+      alt: 'Bestia León convertida en chica anime con rasgos de leona, posando con actitud orgullosa junto a la bestia dragón en el cumpleaños de Dragón Primordial, rodeados de regalos y globos',
       audios: ['audio/leon-mensaje.mp3'],
       lineasHTML: `
-        <p class="acotacion">[voz grave, con un dejo teatral y orgulloso]</p>
-        <p class="linea calma">Que no se diga que el Rey de la Sabana hace fila para felicitar a nadie... pero hoy hago una excepción.</p>
+        <p class="acotacion">[voz firme y serena, con un dejo de orgullo]</p>
+        <p class="linea calma">Que no se diga que la Reina de la Sabana hace fila para felicitar a nadie... pero hoy hago una excepción.</p>
         <p class="linea grito alt">¡PORQUE HOY EL REINO ENTERO RUGE TU NOMBRE, DRAGÓN PRIMORDIAL!</p>
-        <p class="linea calma">Cada bestia que creaste aprendió a caminar erguida mirando al León... y ninguna se atrevió a robarme la melena.</p>
-        <p class="acotacion">[se acomoda la melena con dramatismo]</p>
+        <p class="linea calma">Cada bestia que creaste aprendió a caminar erguida mirando a la Leona... y ninguna se atrevió a tocarme la melena.</p>
+        <p class="acotacion">[se acomoda la melena con elegancia]</p>
         <p class="linea grito">¡ASÍ QUE HOY BAJO LA GUARDIA, SOLO HOY, Y TE DIGO LA VERDAD!</p>
         <p class="linea grito alt climax">SIN TI, ESTE REINO DE BESTIAS NO SERÍA MÁS QUE UNA SABANA VACÍA.</p>
-        <p class="linea calma">Sos el verdadero rey detrás de todos nosotros. Yo solo tomo prestado el título.</p>
+        <p class="linea calma">Tú eres quien reina detrás de todas nosotras. Yo solo llevo la corona prestada.</p>
         <p class="linea final">Feliz cumpleaños, Dragón Primordial. Que tu reinado dure mil generaciones más.</p>
       `
     }
@@ -586,6 +610,10 @@
   const controlVolumen = document.getElementById('volumen-narracion');
   const botonCompartir = document.getElementById('boton-compartir');
   const botonDescargar = document.getElementById('boton-descargar');
+  const eyebrowEl = document.getElementById('eyebrow');
+  const monologoEl = document.querySelector('.monologue');
+
+  const esperar = ms => new Promise(resolve => setTimeout(resolve, ms));
 
   // === 🔊 Volumen del mensaje narrado (se recuerda entre visitas) ===
   let volumenNarracionGuardado = 1;
@@ -616,14 +644,36 @@
     cronometrosKaraoke = [];
   }
 
+  // Peso de cada línea = cantidad de caracteres hablados. Las [acotaciones] no se dicen en voz alta:
+  // pesan 0 y aparecen justo cuando empieza la línea que sigue.
+  function pesosDelGrupo(grupo){
+    return grupo.map(l => l.classList.contains('acotacion') ? 0 : Math.max((l.textContent || '').trim().length, 1));
+  }
+
+  // Si no se pudo leer la duración real del audio, la estimamos (~14 caracteres por segundo al hablar)
+  function estimarDuracion(grupo){
+    const total = pesosDelGrupo(grupo).reduce((a, b) => a + b, 0);
+    return Math.max(3, total / 14);
+  }
+
   function programarLineasPista(grupo, duracionSegundos){
     if(reducidoMovimiento || !grupo || !grupo.length) return;
-    const n = grupo.length;
+    const pesos = pesosDelGrupo(grupo);
+    const total = pesos.reduce((a, b) => a + b, 0) || 1;
+    let acumulado = 0;
     grupo.forEach((linea, i) => {
-      const momento = (duracionSegundos * (i + 1)) / (n + 1) * 1000;
+      const momento = Math.max(200, (acumulado / total) * duracionSegundos * 1000);
+      acumulado += pesos[i];
       const id = setTimeout(() => linea.classList.add('linea-visible'), momento);
       cronometrosKaraoke.push(id);
     });
+  }
+
+  // Vuelve a esconder el texto (para repetir el efecto al escuchar de nuevo)
+  function reiniciarKaraoke(){
+    limpiarKaraoke();
+    if(reducidoMovimiento) return;
+    monologoEl.querySelectorAll('.linea-visible').forEach(l => l.classList.remove('linea-visible'));
   }
 
   function construirLineasKaraoke(m){
@@ -662,23 +712,76 @@
   }
   botonMusica.addEventListener('click', alternarMusica);
 
+  // Ambiente sintetizado: solo suena en los mensajes que lo piden (la Araña)
+  function sincronizarAmbiente(){
+    if(mensajes[indiceMensaje].ambiente){
+      iniciarAmbiente();
+    } else {
+      detenerAmbiente();
+    }
+  }
+
   function reproducirSiguienteAudio(){
     iniciarMusicaFondo();
     botonFiesta.classList.add('oculto');
+
+    // Si ya sonaron todas las pistas, empezamos de cero (escuchar de nuevo)
+    if(indiceAudioActual >= listaAudios.length) indiceAudioActual = 0;
+
     const idx = indiceAudioActual;
     const pista = listaAudios[idx];
+    const grupo = gruposLineasKaraoke[idx] || [];
+
+    if(idx === 0){
+      reiniciarKaraoke();
+      sincronizarAmbiente();
+    }
+
     reproductor.src = pista;
     reproductor.onloadedmetadata = () => {
-      const grupo = gruposLineasKaraoke[idx] || [];
       const duracionDetectada = reproductor.duration;
       const duracion = (isFinite(duracionDetectada) && duracionDetectada > 0)
         ? duracionDetectada
-        : Math.max(grupo.length * 2.6, 3);
+        : estimarDuracion(grupo);
       programarLineasPista(grupo, duracion);
     };
-    reproductor.play().catch(err => console.warn('No se pudo reproducir el audio:', err));
+
+    // Si el archivo no existe o no carga, el texto igual se revela y la tarjeta sigue funcionando
+    reproductor.onerror = () => {
+      console.warn('No se pudo cargar el audio:', pista);
+      const duracion = estimarDuracion(grupo);
+      programarLineasPista(grupo, duracion);
+      cronometrosKaraoke.push(setTimeout(alTerminarPista, duracion * 1000));
+    };
+
+    reproductor.play().catch(err => {
+      console.warn('No se pudo reproducir el audio:', err);
+      // El navegador pidió un toque del usuario: volvemos a mostrar el botón y reintentamos esta misma pista
+      if(err && err.name === 'NotAllowedError'){
+        limpiarKaraoke();
+        indiceAudioActual = idx;
+        botonFiesta.classList.remove('oculto');
+      }
+    });
+
     fuegosActivos = !reducidoMovimiento && pista.includes('feliz-cumple');
-    indiceAudioActual = (indiceAudioActual + 1) % listaAudios.length;
+    indiceAudioActual = idx + 1;
+  }
+
+  // Cuando termina una pista: pasa a la siguiente o cierra el mensaje
+  function alTerminarPista(){
+    if(indiceAudioActual < listaAudios.length){
+      reproducirSiguienteAudio();
+    } else {
+      finalizarMensaje();
+    }
+  }
+
+  function finalizarMensaje(){
+    fuegosActivos = false;
+    detenerAmbiente();
+    botonFiesta.textContent = `🔁 Escuchar a ${mensajes[indiceMensaje].personaje} de nuevo`;
+    botonFiesta.classList.remove('oculto');
   }
 
   // === 🏷️ Nombre del personaje, link directo (#hash) y puntitos del mensaje actual ===
@@ -705,7 +808,16 @@
 
   function actualizarPuntos(){
     const puntos = puntosContenedor.querySelectorAll('.punto');
-    puntos.forEach((p, i) => p.classList.toggle('activo', i === indiceMensaje));
+    puntos.forEach((p, i) => {
+      p.classList.toggle('activo', i === indiceMensaje);
+      p.setAttribute('aria-current', i === indiceMensaje ? 'true' : 'false');
+    });
+  }
+
+  // Precarga la imagen del siguiente mensaje para que el cambio no se vea cortado
+  function precargarImagen(src){
+    const precarga = new Image();
+    precarga.src = src;
   }
 
   function indiceDesdeHash(){
@@ -726,34 +838,46 @@
     img.src = m.imagen;
     img.alt = m.alt;
 
+    eyebrowEl.textContent = m.eyebrow || 'Mensaje de cumpleaños';
+    monologoEl.setAttribute('aria-label', m.eyebrow || 'Mensaje de cumpleaños');
+
     listaAudios = m.audios;
     indiceAudioActual = 0;
+    fuegosActivos = false;
 
     actualizarNombrePersonaje(m);
     actualizarPuntos();
     actualizarHashURL(m);
+    botonFiesta.classList.remove('oculto');
 
     if(reproducirAudio){
       reproductor.pause();
       reproducirSiguienteAudio();
-      if(m.ambiente){
-        iniciarAmbiente();
-      } else {
-        detenerAmbiente();
-      }
+    } else {
+      reproductor.pause();
+      detenerAmbiente();
     }
+
+    // Deja lista la imagen del mensaje que sigue (un poco después, para no competir con la actual)
+    setTimeout(() => precargarImagen(mensajes[(indiceMensaje + 1) % mensajes.length].imagen), 1500);
   }
 
   function cargarMensaje(indice){
     prepararMensaje(indice, { reproducirAudio: true });
   }
 
-  reproductor.addEventListener('ended', reproducirSiguienteAudio);
+  reproductor.addEventListener('ended', alTerminarPista);
   botonFiesta.addEventListener('click', reproducirSiguienteAudio);
 
   // === 🔥 Transición oscura/con fuego al cambiar de mensaje ===
+  // Espera a que la imagen nueva esté lista antes de abrir la oscuridad (máx. 2.5 s), y siempre la abre aunque algo falle.
+  function esperarImagenLista(img, maxMs){
+    const decodificada = img.decode ? img.decode().catch(() => {}) : Promise.resolve();
+    return Promise.race([decodificada, esperar(maxMs)]);
+  }
+
   let transicionEnCurso = false;
-  function transicionarA(nuevoIndice){
+  async function transicionarA(nuevoIndice){
     if(transicionEnCurso || nuevoIndice === indiceMensaje) return;
 
     if(reducidoMovimiento){
@@ -764,11 +888,17 @@
     transicionEnCurso = true;
     const overlay = document.getElementById('transicion');
     overlay.classList.add('activa');
-    setTimeout(() => {
+    try {
+      await esperar(400);
       cargarMensaje(nuevoIndice);
+      await esperarImagenLista(document.querySelector('.frame img'), 2500);
+    } catch(err) {
+      console.warn('Error durante la transición:', err);
+    } finally {
       overlay.classList.remove('activa');
-      setTimeout(() => { transicionEnCurso = false; }, 400);
-    }, 400);
+      await esperar(400);
+      transicionEnCurso = false;
+    }
   }
 
   function alternarMensaje(){
@@ -815,13 +945,11 @@
       return;
     }
 
-    // Revela cualquier línea que todavía esté oculta, para que la imagen salga con el texto completo
-    document.querySelectorAll('.monologue .linea-oculta:not(.linea-visible)')
-      .forEach(linea => linea.classList.add('linea-visible'));
-
     const textoOriginal = botonDescargar.textContent;
     botonDescargar.disabled = true;
     botonDescargar.textContent = '⏳ Generando...';
+    // Modo captura: congela animaciones y muestra todo el texto SOLO mientras se genera la imagen
+    document.body.classList.add('capturando');
     try {
       const escena = document.querySelector('main.stage');
       const lienzo = await html2canvas(escena, {
@@ -837,6 +965,7 @@
       console.warn('No se pudo generar la imagen:', err);
       alert('Hubo un problema generando la imagen de la tarjeta.');
     } finally {
+      document.body.classList.remove('capturando');
       botonDescargar.disabled = false;
       botonDescargar.textContent = textoOriginal;
     }
@@ -909,10 +1038,6 @@
     }, 1100);
     nodosAmbiente = null;
   }
-
-  // === 🔗 Si llegaron con un link directo (#rem, #arana, #leon...), arrancar en ese mensaje ===
-  construirPuntos();
-  prepararMensaje(indiceDesdeHash(), { reproducirAudio: false });
 
   // === 🎆 Fuegos artificiales (se activan durante el audio de "feliz cumpleaños") ===
   const canvasFuegos = document.getElementById('fuegos-artificiales');
@@ -990,6 +1115,16 @@
     requestAnimationFrame(tickFuegos);
   }
   tickFuegos();
+
+  // === 🔗 Arranque: si llegaron con un link directo (#rem, #arana, #leon...), empezar en ese mensaje ===
+  construirPuntos();
+  prepararMensaje(indiceDesdeHash(), { reproducirAudio: false });
+
+  // Si pegan otro link con #id estando ya en la página, cambia de mensaje
+  window.addEventListener('hashchange', () => {
+    const i = indiceDesdeHash();
+    if(i !== indiceMensaje) transicionarA(i);
+  });
 </script>
 
 <script>
