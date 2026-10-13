@@ -166,6 +166,18 @@
     font-size:clamp(.92rem,3.6vw,1.1rem);
   }
 
+  /* === 🎤 Efecto karaoke: cada línea arranca invisible y se revela con el audio === */
+  .linea-oculta{
+    opacity:0;
+    transform:translateY(6px);
+    transition:opacity .6s ease, transform .6s ease;
+  }
+
+  .linea-oculta.linea-visible{
+    opacity:1;
+    transform:translateY(0);
+  }
+
   .grito{
     text-transform:uppercase;
     display:inline-block;
@@ -282,6 +294,112 @@
     border-color:var(--gold);
   }
 
+  /* === 🏷️ Nombre del personaje actual (esquina inferior izquierda) === */
+  .nombre-personaje{
+    position:fixed;
+    bottom:14px;
+    left:14px;
+    z-index:5;
+    font-family:'Cinzel',serif;
+    font-size:.65rem;
+    letter-spacing:.03em;
+    color:var(--muted);
+    background:rgba(20,8,4,0.75);
+    border:1px solid var(--border);
+    padding:.45em .8em;
+    -webkit-clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
+    clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
+    max-width:55vw;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  /* === 🔊 Control de volumen del mensaje (esquina inferior derecha) === */
+  .control-volumen{
+    position:fixed;
+    bottom:14px;
+    right:14px;
+    z-index:5;
+    display:flex;
+    align-items:center;
+    gap:.5em;
+    background:rgba(20,8,4,0.75);
+    border:1px solid var(--border);
+    padding:.4em .75em;
+    -webkit-clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
+    clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
+  }
+
+  .control-volumen span{ font-size:.8rem; }
+
+  .control-volumen input[type="range"]{
+    width:70px;
+    accent-color:var(--fire);
+    cursor:pointer;
+  }
+
+  /* === ●●○ Puntitos del mensaje actual === */
+  .puntos-mensaje{
+    display:flex;
+    gap:.55em;
+    justify-content:center;
+  }
+
+  .puntos-mensaje .punto{
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    border:1px solid var(--border);
+    background:transparent;
+    padding:0;
+    cursor:pointer;
+    transition:background .25s ease, box-shadow .25s ease, transform .25s ease;
+  }
+
+  .puntos-mensaje .punto:hover{ transform:scale(1.2); }
+
+  .puntos-mensaje .punto.activo{
+    background:var(--fire);
+    border-color:var(--fire);
+    box-shadow:0 0 10px var(--fire);
+  }
+
+  /* === 🔗📸 Compartir y descargar === */
+  .acciones-tarjeta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:.6em;
+    justify-content:center;
+  }
+
+  #boton-compartir,
+  #boton-descargar{
+    font-family:'Cinzel',serif;
+    font-weight:700;
+    font-size:.72rem;
+    letter-spacing:.03em;
+    color:var(--muted);
+    background:rgba(20,8,4,0.75);
+    border:1px solid var(--border);
+    padding:.6em 1.1em;
+    cursor:pointer;
+    -webkit-clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
+    clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
+    transition:color .2s ease, border-color .2s ease;
+  }
+
+  #boton-compartir:hover,
+  #boton-descargar:hover{
+    color:var(--gold);
+    border-color:var(--gold);
+  }
+
+  #boton-descargar:disabled{
+    opacity:.6;
+    cursor:wait;
+  }
+
   #transicion{
     position:fixed;
     inset:0;
@@ -313,6 +431,11 @@
 
 <button id="boton-musica" type="button" title="Silenciar música de fondo">🎵 Música</button>
 <button id="boton-alternar" type="button" title="Cambiar de mensaje">🔄 Otro mensaje</button>
+<div id="nombre-personaje" class="nombre-personaje" aria-live="polite"></div>
+<div id="control-volumen" class="control-volumen" title="Volumen del mensaje">
+  <span aria-hidden="true">🔊</span>
+  <input type="range" id="volumen-narracion" min="0" max="100" value="100" aria-label="Volumen del mensaje de cumpleaños">
+</div>
 
 <main class="stage">
   <header class="title">
@@ -344,17 +467,28 @@
     <p class="linea final">Que vivas mil años más creando bestias.</p>
   </section>
 
+  <div id="puntos-mensaje" class="puntos-mensaje" role="tablist" aria-label="Selector de mensaje"></div>
+
+  <div class="acciones-tarjeta">
+    <button id="boton-compartir" type="button" title="Copiar link de este mensaje">🔗 Copiar link</button>
+    <button id="boton-descargar" type="button" title="Descargar la tarjeta como imagen">📸 Descargar imagen</button>
+  </div>
+
   <footer class="sig">🔥 Bestias y Monstruos 🔥</footer>
 </main>
 
 <audio id="reproductor-grito" preload="auto"></audio>
 <audio id="musica-fondo" src="audio/ambiente-funk.mp3" loop preload="auto"></audio>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 <script>
   // === 🎉 Mensajes de cumpleaños (texto + imagen + audio, intercambiables) ===
   const mensajes = [
     {
       // Mensaje 1: el grito original (Emilia + Subaru)
+      id: 'grito',
+      personaje: 'Emilia & Subaru',
       imagen: 'cumple-dragon.png',
       alt: 'Bestia dragón roja con sombrero de fiesta soplando la vela de un pastel de cumpleaños, rodeada de regalos, globos y carteles de Bestias y Monstruos',
       audios: [
@@ -380,6 +514,8 @@
     },
     {
       // Mensaje 2: el tierno (Rem)
+      id: 'rem',
+      personaje: 'Rem',
       imagen: 'rem-Abrazandome.png',
       alt: 'Rem, la mucama de Re:Zero, abrazando cariñosamente a la bestia dragón en la fiesta de cumpleaños de Dragón Primordial, rodeados de regalos y globos',
       audios: ['audio/rem-mensaje.mp3'],
@@ -394,6 +530,8 @@
     },
     {
       // Mensaje 3: Bestia Araña, tono tsundere (voz: Priscilla Barielle, Fish Audio)
+      id: 'arana',
+      personaje: 'Bestia Araña',
       imagen: 'arana-tsundere.png',
       alt: 'Bestia Araña convertida en chica anime de cabello oscuro, con broche de araña y sombrero de fiesta con telaraña, abrazando a la bestia dragón en la fiesta de cumpleaños de Dragón Primordial',
       audios: ['audio/arana-mensaje.mp3'],
@@ -409,6 +547,26 @@
         <p class="linea calma">Solo... arreglalo en la próxima actualización. Por favor. Ya. Contenta.</p>
         <p class="linea final">Feliz cumpleaños, supongo. No festejé por ti... festejé porque había pastel.</p>
       `
+    },
+    {
+      // Mensaje 4: Bestia León, tono orgulloso/regio
+      // Elegí vos la voz en Fish Audio: algo grave, con porte de rey — texto original, sin atarlo a ningún personaje puntual.
+      id: 'leon',
+      personaje: 'Bestia León',
+      imagen: 'leon-rey.png',
+      alt: 'Bestia León con melena dorada y una corona improvisada de fiesta, posando con actitud orgullosa junto a la bestia dragón en el cumpleaños de Dragón Primordial, rodeados de regalos y globos',
+      audios: ['audio/leon-mensaje.mp3'],
+      lineasHTML: `
+        <p class="acotacion">[voz grave, con un dejo teatral y orgulloso]</p>
+        <p class="linea calma">Que no se diga que el Rey de la Sabana hace fila para felicitar a nadie... pero hoy hago una excepción.</p>
+        <p class="linea grito alt">¡PORQUE HOY EL REINO ENTERO RUGE TU NOMBRE, DRAGÓN PRIMORDIAL!</p>
+        <p class="linea calma">Cada bestia que creaste aprendió a caminar erguida mirando al León... y ninguna se atrevió a robarme la melena.</p>
+        <p class="acotacion">[se acomoda la melena con dramatismo]</p>
+        <p class="linea grito">¡ASÍ QUE HOY BAJO LA GUARDIA, SOLO HOY, Y TE DIGO LA VERDAD!</p>
+        <p class="linea grito alt climax">SIN TI, ESTE REINO DE BESTIAS NO SERÍA MÁS QUE UNA SABANA VACÍA.</p>
+        <p class="linea calma">Sos el verdadero rey detrás de todos nosotros. Yo solo tomo prestado el título.</p>
+        <p class="linea final">Feliz cumpleaños, Dragón Primordial. Que tu reinado dure mil generaciones más.</p>
+      `
     }
   ];
 
@@ -416,11 +574,71 @@
   let indiceAudioActual = 0;
   let listaAudios = mensajes[indiceMensaje].audios;
   let fuegosActivos = false;
+  let gruposLineasKaraoke = [];
+  let cronometrosKaraoke = [];
 
   const reproductor = document.getElementById('reproductor-grito');
   const botonFiesta = document.getElementById('boton-fiesta');
   const botonAlternar = document.getElementById('boton-alternar');
   const reducidoMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const nombrePersonajeEl = document.getElementById('nombre-personaje');
+  const puntosContenedor = document.getElementById('puntos-mensaje');
+  const controlVolumen = document.getElementById('volumen-narracion');
+  const botonCompartir = document.getElementById('boton-compartir');
+  const botonDescargar = document.getElementById('boton-descargar');
+
+  // === 🔊 Volumen del mensaje narrado (se recuerda entre visitas) ===
+  let volumenNarracionGuardado = 1;
+  try {
+    const guardado = localStorage.getItem('tarjeta-volumen-narracion');
+    if(guardado !== null) volumenNarracionGuardado = parseFloat(guardado);
+  } catch(err) { /* localStorage puede estar bloqueado; seguimos con el valor por defecto */ }
+  reproductor.volume = volumenNarracionGuardado;
+  controlVolumen.value = Math.round(volumenNarracionGuardado * 100);
+  controlVolumen.addEventListener('input', () => {
+    const valor = controlVolumen.value / 100;
+    reproductor.volume = valor;
+    try { localStorage.setItem('tarjeta-volumen-narracion', String(valor)); } catch(err) {}
+  });
+
+  // === 🎤 Helpers del efecto karaoke (reparte las líneas entre las pistas de audio del mensaje) ===
+  function repartirLineasPorPista(lineas, cantidadPistas){
+    const grupos = Array.from({ length: cantidadPistas }, () => []);
+    lineas.forEach((linea, i) => {
+      const grupo = Math.min(cantidadPistas - 1, Math.floor((i * cantidadPistas) / lineas.length));
+      grupos[grupo].push(linea);
+    });
+    return grupos;
+  }
+
+  function limpiarKaraoke(){
+    cronometrosKaraoke.forEach(id => clearTimeout(id));
+    cronometrosKaraoke = [];
+  }
+
+  function programarLineasPista(grupo, duracionSegundos){
+    if(reducidoMovimiento || !grupo || !grupo.length) return;
+    const n = grupo.length;
+    grupo.forEach((linea, i) => {
+      const momento = (duracionSegundos * (i + 1)) / (n + 1) * 1000;
+      const id = setTimeout(() => linea.classList.add('linea-visible'), momento);
+      cronometrosKaraoke.push(id);
+    });
+  }
+
+  function construirLineasKaraoke(m){
+    const contenedor = document.querySelector('.monologue');
+    contenedor.innerHTML = '';
+    const temporal = document.createElement('div');
+    temporal.innerHTML = m.lineasHTML.trim();
+    const lineas = Array.from(temporal.children);
+    lineas.forEach(linea => {
+      linea.classList.add('linea-oculta');
+      if(reducidoMovimiento) linea.classList.add('linea-visible');
+      contenedor.appendChild(linea);
+    });
+    gruposLineasKaraoke = repartirLineasPorPista(lineas, m.audios.length);
+  }
 
   // === 🎵 Música de fondo (ambiente-funk.mp3): arranca con el primer clic y se puede silenciar ===
   const musicaFondo = document.getElementById('musica-fondo');
@@ -447,29 +665,87 @@
   function reproducirSiguienteAudio(){
     iniciarMusicaFondo();
     botonFiesta.classList.add('oculto');
-    const pista = listaAudios[indiceAudioActual];
+    const idx = indiceAudioActual;
+    const pista = listaAudios[idx];
     reproductor.src = pista;
+    reproductor.onloadedmetadata = () => {
+      const grupo = gruposLineasKaraoke[idx] || [];
+      const duracionDetectada = reproductor.duration;
+      const duracion = (isFinite(duracionDetectada) && duracionDetectada > 0)
+        ? duracionDetectada
+        : Math.max(grupo.length * 2.6, 3);
+      programarLineasPista(grupo, duracion);
+    };
     reproductor.play().catch(err => console.warn('No se pudo reproducir el audio:', err));
     fuegosActivos = !reducidoMovimiento && pista.includes('feliz-cumple');
     indiceAudioActual = (indiceAudioActual + 1) % listaAudios.length;
   }
 
-  function cargarMensaje(indice){
+  // === 🏷️ Nombre del personaje, link directo (#hash) y puntitos del mensaje actual ===
+  function actualizarNombrePersonaje(m){
+    nombrePersonajeEl.textContent = `🎙️ ${m.personaje}`;
+    botonFiesta.textContent = `🎉 Toca para escuchar a ${m.personaje} 🎉`;
+  }
+
+  function actualizarHashURL(m){
+    try { history.replaceState(null, '', '#' + m.id); } catch(err) {}
+  }
+
+  function construirPuntos(){
+    puntosContenedor.innerHTML = '';
+    mensajes.forEach((m, i) => {
+      const punto = document.createElement('button');
+      punto.type = 'button';
+      punto.className = 'punto';
+      punto.setAttribute('aria-label', `Ver mensaje de ${m.personaje}`);
+      punto.addEventListener('click', () => transicionarA(i));
+      puntosContenedor.appendChild(punto);
+    });
+  }
+
+  function actualizarPuntos(){
+    const puntos = puntosContenedor.querySelectorAll('.punto');
+    puntos.forEach((p, i) => p.classList.toggle('activo', i === indiceMensaje));
+  }
+
+  function indiceDesdeHash(){
+    const hash = decodeURIComponent(window.location.hash.replace('#', ''));
+    const i = mensajes.findIndex(m => m.id === hash);
+    return i >= 0 ? i : 0;
+  }
+
+  function prepararMensaje(indice, opciones){
+    const reproducirAudio = !!(opciones && opciones.reproducirAudio);
+    limpiarKaraoke();
     indiceMensaje = indice;
     const m = mensajes[indiceMensaje];
-    document.querySelector('.monologue').innerHTML = m.lineasHTML;
+
+    construirLineasKaraoke(m);
+
     const img = document.querySelector('.frame img');
     img.src = m.imagen;
     img.alt = m.alt;
+
     listaAudios = m.audios;
     indiceAudioActual = 0;
-    reproductor.pause();
-    reproducirSiguienteAudio();
-    if(m.ambiente){
-      iniciarAmbiente();
-    } else {
-      detenerAmbiente();
+
+    actualizarNombrePersonaje(m);
+    actualizarPuntos();
+    actualizarHashURL(m);
+
+    if(reproducirAudio){
+      reproductor.pause();
+      reproducirSiguienteAudio();
+      if(m.ambiente){
+        iniciarAmbiente();
+      } else {
+        detenerAmbiente();
+      }
     }
+  }
+
+  function cargarMensaje(indice){
+    prepararMensaje(indice, { reproducirAudio: true });
   }
 
   reproductor.addEventListener('ended', reproducirSiguienteAudio);
@@ -477,9 +753,8 @@
 
   // === 🔥 Transición oscura/con fuego al cambiar de mensaje ===
   let transicionEnCurso = false;
-  function alternarMensaje(){
-    if(transicionEnCurso) return;
-    const nuevoIndice = (indiceMensaje + 1) % mensajes.length;
+  function transicionarA(nuevoIndice){
+    if(transicionEnCurso || nuevoIndice === indiceMensaje) return;
 
     if(reducidoMovimiento){
       cargarMensaje(nuevoIndice);
@@ -496,7 +771,76 @@
     }, 400);
   }
 
+  function alternarMensaje(){
+    const nuevoIndice = (indiceMensaje + 1) % mensajes.length;
+    transicionarA(nuevoIndice);
+  }
+
   botonAlternar.addEventListener('click', alternarMensaje);
+
+  // === 🔗 Copiar el link directo al mensaje actual ===
+  function obtenerURLMensajeActual(){
+    const url = new URL(window.location.href);
+    url.hash = mensajes[indiceMensaje].id;
+    return url.toString();
+  }
+
+  function mostrarAvisoTemporal(boton, textoTemporal){
+    if(!boton.dataset.textoOriginal){
+      boton.dataset.textoOriginal = boton.textContent;
+    }
+    boton.textContent = textoTemporal;
+    clearTimeout(boton._avisoTimeout);
+    boton._avisoTimeout = setTimeout(() => {
+      boton.textContent = boton.dataset.textoOriginal;
+    }, 1800);
+  }
+
+  async function copiarLinkMensaje(){
+    const url = obtenerURLMensajeActual();
+    try {
+      await navigator.clipboard.writeText(url);
+      mostrarAvisoTemporal(botonCompartir, '✅ ¡Copiado!');
+    } catch(err) {
+      window.prompt('Copiá el link manualmente:', url);
+    }
+  }
+
+  botonCompartir.addEventListener('click', copiarLinkMensaje);
+
+  // === 📸 Descargar la tarjeta como imagen (html2canvas) ===
+  botonDescargar.addEventListener('click', async () => {
+    if(typeof html2canvas !== 'function'){
+      alert('No se pudo cargar la herramienta para generar la imagen. Probá de nuevo en unos segundos.');
+      return;
+    }
+
+    // Revela cualquier línea que todavía esté oculta, para que la imagen salga con el texto completo
+    document.querySelectorAll('.monologue .linea-oculta:not(.linea-visible)')
+      .forEach(linea => linea.classList.add('linea-visible'));
+
+    const textoOriginal = botonDescargar.textContent;
+    botonDescargar.disabled = true;
+    botonDescargar.textContent = '⏳ Generando...';
+    try {
+      const escena = document.querySelector('main.stage');
+      const lienzo = await html2canvas(escena, {
+        backgroundColor: '#050305',
+        scale: 2,
+        useCORS: true
+      });
+      const enlace = document.createElement('a');
+      enlace.download = `tarjeta-dragon-primordial-${mensajes[indiceMensaje].id}.png`;
+      enlace.href = lienzo.toDataURL('image/png');
+      enlace.click();
+    } catch(err) {
+      console.warn('No se pudo generar la imagen:', err);
+      alert('Hubo un problema generando la imagen de la tarjeta.');
+    } finally {
+      botonDescargar.disabled = false;
+      botonDescargar.textContent = textoOriginal;
+    }
+  });
 
   // === 🕸️ Ambiente sintetizado (Web Audio API, sin archivos ni derechos de autor) ===
   let contextoAudio = null;
@@ -565,6 +909,10 @@
     }, 1100);
     nodosAmbiente = null;
   }
+
+  // === 🔗 Si llegaron con un link directo (#rem, #arana, #leon...), arrancar en ese mensaje ===
+  construirPuntos();
+  prepararMensaje(indiceDesdeHash(), { reproducirAudio: false });
 
   // === 🎆 Fuegos artificiales (se activan durante el audio de "feliz cumpleaños") ===
   const canvasFuegos = document.getElementById('fuegos-artificiales');
