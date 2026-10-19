@@ -577,9 +577,11 @@
       id: 'leon',
       personaje: 'Bestia León',
       eyebrow: 'Decreto real de la Bestia León',
-      imagen: 'leon-rey.png',
+      imagen: 'leona-rey.png',
       alt: 'Bestia León convertida en chica anime con rasgos de leona, posando con actitud orgullosa junto a la bestia dragón en el cumpleaños de Dragón Primordial, rodeados de regalos y globos',
-      audios: ['audio/leon-mensaje.mp3'],
+      audios: ['audio/audioleona-mensaje-1.mp3', 'audio/audioleona-mensaje-2.mp3'],
+      imagenes: ['leon-reina-calma.png', 'leon-reina-rugido.png'],
+      imagenesFinal: ['leona-celebracion-neon-1.png', 'leona-celebracion-neon-2.png'],
       lineasHTML: `
         <p class="acotacion">[voz firme y serena, con un dejo de orgullo]</p>
         <p class="linea calma">Que no se diga que la Reina de la Sabana hace fila para felicitar a nadie... pero hoy hago una excepción.</p>
@@ -731,6 +733,12 @@
     const idx = indiceAudioActual;
     const pista = listaAudios[idx];
     const grupo = gruposLineasKaraoke[idx] || [];
+    const m = mensajes[indiceMensaje];
+
+    // Si el mensaje tiene una imagen distinta por pista (ej. Leona: calma → rugido), la cambia al arrancar esa pista
+    if(m.imagenes && m.imagenes[idx]){
+      document.querySelector('.frame img').src = m.imagenes[idx];
+    }
 
     if(idx === 0){
       reiniciarKaraoke();
@@ -780,7 +788,16 @@
   function finalizarMensaje(){
     fuegosActivos = false;
     detenerAmbiente();
-    botonFiesta.textContent = `🔁 Escuchar a ${mensajes[indiceMensaje].personaje} de nuevo`;
+    const m = mensajes[indiceMensaje];
+
+    // Si el mensaje tiene imágenes de cierre (ej. celebración de Leona), alterna entre ellas cada vez que termina
+    if(m.imagenesFinal && m.imagenesFinal.length){
+      const i = (m._vecesFinalizado || 0) % m.imagenesFinal.length;
+      document.querySelector('.frame img').src = m.imagenesFinal[i];
+      m._vecesFinalizado = (m._vecesFinalizado || 0) + 1;
+    }
+
+    botonFiesta.textContent = `🔁 Escuchar a ${m.personaje} de nuevo`;
     botonFiesta.classList.remove('oculto');
   }
 
