@@ -76,6 +76,13 @@
     align-items:center;
     gap:clamp(22px,4.5vw,34px);
     text-align:center;
+    transition:filter .45s ease, transform .45s ease;
+  }
+
+  /* === 🌀 Mientras se cambia de mensaje, toda la escena respira hacia adentro (más fluido que un corte seco) === */
+  body.transicionando .stage{
+    filter:blur(3px) brightness(.85);
+    transform:scale(.985);
   }
 
   .title h1{
@@ -135,12 +142,25 @@
     -webkit-clip-path:polygon(28px 0,100% 0,100% calc(100% - 28px),calc(100% - 28px) 100%,0 100%,0 28px);
     clip-path:polygon(28px 0,100% 0,100% calc(100% - 28px),calc(100% - 28px) 100%,0 100%,0 28px);
     border:1px solid var(--border);
-    animation:glow-pulse 5s ease-in-out infinite;
+    animation:glow-pulse 5s ease-in-out infinite, respirar-imagen 14s ease-in-out infinite;
+    transition:opacity .5s ease, filter .5s ease;
+  }
+
+  /* === 🌫️ Fundido suave al cambiar la imagen dentro del mismo mensaje (calma→rugido, celebración final) === */
+  .frame img.cambiando{
+    opacity:0;
+    filter:blur(8px) brightness(1.3);
   }
 
   @keyframes glow-pulse{
     0%,100%{box-shadow:0 0 0 1px rgba(0,0,0,.4),0 0 40px rgba(255,140,0,.25),0 0 90px rgba(255,77,0,.12);}
     50%{box-shadow:0 0 0 1px rgba(0,0,0,.4),0 0 56px rgba(255,140,0,.4),0 0 112px rgba(255,77,0,.2);}
+  }
+
+  /* === 🌬️ Respiración sutil: la imagen "vive" con un zoom lentísimo, para que la tarjeta nunca se sienta estática === */
+  @keyframes respirar-imagen{
+    0%,100%{transform:scale(1);}
+    50%{transform:scale(1.035);}
   }
 
   .eyebrow{
@@ -666,7 +686,11 @@
     grupo.forEach((linea, i) => {
       const momento = Math.max(200, (acumulado / total) * duracionSegundos * 1000);
       acumulado += pesos[i];
-      const id = setTimeout(() => linea.classList.add('linea-visible'), momento);
+      const id = setTimeout(() => {
+        linea.classList.add('linea-visible');
+        // 🎆 La línea climática de CUALQUIER personaje dispara una ráfaga extra de fuegos
+        if(linea.classList.contains('climax')) rafagaFuegos();
+      }, momento);
       cronometrosKaraoke.push(id);
     });
   }
@@ -723,6 +747,21 @@
     }
   }
 
+  // === 🌫️ Cambia la imagen del marco con un fundido suave, en vez de un salto brusco (calma→rugido, celebración final) ===
+  function cambiarImagenConFundido(nuevoSrc){
+    const img = document.querySelector('.frame img');
+    if(!nuevoSrc || img.getAttribute('src') === nuevoSrc) return;
+    if(reducidoMovimiento){
+      img.src = nuevoSrc;
+      return;
+    }
+    img.classList.add('cambiando');
+    setTimeout(() => {
+      img.src = nuevoSrc;
+      img.classList.remove('cambiando');
+    }, 260);
+  }
+
   function reproducirSiguienteAudio(){
     iniciarMusicaFondo();
     botonFiesta.classList.add('oculto');
@@ -737,7 +776,7 @@
 
     // Si el mensaje tiene una imagen distinta por pista (ej. Leona: calma → rugido), la cambia al arrancar esa pista
     if(m.imagenes && m.imagenes[idx]){
-      document.querySelector('.frame img').src = m.imagenes[idx];
+      cambiarImagenConFundido(m.imagenes[idx]);
     }
 
     if(idx === 0){
@@ -772,7 +811,8 @@
       }
     });
 
-    fuegosActivos = !reducidoMovimiento && pista.includes('feliz-cumple');
+    // 🎆 Antes solo sonaban en la pista "feliz-cumple" (mensaje 1). Ahora acompañan a CUALQUIER personaje.
+    fuegosActivos = !reducidoMovimiento;
     indiceAudioActual = idx + 1;
   }
 
@@ -793,7 +833,7 @@
     // Si el mensaje tiene imágenes de cierre (ej. celebración de Leona), alterna entre ellas cada vez que termina
     if(m.imagenesFinal && m.imagenesFinal.length){
       const i = (m._vecesFinalizado || 0) % m.imagenesFinal.length;
-      document.querySelector('.frame img').src = m.imagenesFinal[i];
+      cambiarImagenConFundido(m.imagenesFinal[i]);
       m._vecesFinalizado = (m._vecesFinalizado || 0) + 1;
     }
 
@@ -905,6 +945,7 @@
     transicionEnCurso = true;
     const overlay = document.getElementById('transicion');
     overlay.classList.add('activa');
+    document.body.classList.add('transicionando');
     try {
       await esperar(400);
       cargarMensaje(nuevoIndice);
@@ -913,6 +954,7 @@
       console.warn('Error durante la transición:', err);
     } finally {
       overlay.classList.remove('activa');
+      document.body.classList.remove('transicionando');
       await esperar(400);
       transicionEnCurso = false;
     }
@@ -1081,6 +1123,13 @@
     });
   }
 
+  // === 🎆 Ráfaga extra: varios cohetes seguidos para acentuar un momento climático (de cualquier personaje) ===
+  function rafagaFuegos(cantidad = 5){
+    for(let i = 0; i < cantidad; i++){
+      setTimeout(lanzarCohete, i * 130);
+    }
+  }
+
   function explotarCohete(x, y, color){
     const n = 36 + Math.floor(Math.random() * 20);
     for(let i = 0; i < n; i++){
@@ -1099,7 +1148,8 @@
       esperaCohete--;
       if(esperaCohete <= 0){
         lanzarCohete();
-        esperaCohete = 24 + Math.floor(Math.random() * 20);
+        // Ritmo más pausado que antes: ahora suena durante TODOS los mensajes, no solo el clímax de uno
+        esperaCohete = 55 + Math.floor(Math.random() * 45);
       }
     }
 
@@ -1173,6 +1223,51 @@
   window.addEventListener('resize', resize);
   resize();
 
+  // === 🌠 Estrella fugaz ocasional: el cielo de fondo nunca se siente estático, ni siquiera en mensajes largos ===
+  let estrellaFugaz = null;
+  let esperaEstrella = reduced ? Infinity : 400 + Math.random() * 400;
+
+  function lanzarEstrellaFugaz(){
+    const desdeIzquierda = Math.random() < 0.5;
+    estrellaFugaz = {
+      x: desdeIzquierda ? -40 : w + 40,
+      y: Math.random() * h * 0.5,
+      vx: (desdeIzquierda ? 1 : -1) * (6 + Math.random() * 3),
+      vy: 2.2 + Math.random() * 1.4,
+      vida: 1
+    };
+  }
+
+  function dibujarEstrellaFugaz(){
+    if(!reduced && !estrellaFugaz){
+      esperaEstrella--;
+      if(esperaEstrella <= 0){
+        lanzarEstrellaFugaz();
+        esperaEstrella = 900 + Math.floor(Math.random() * 900); // próxima en ~15–30s
+      }
+    }
+    if(!estrellaFugaz) return;
+    const e = estrellaFugaz;
+    e.x += e.vx;
+    e.y += e.vy;
+    e.vida -= 0.012;
+    if(e.vida <= 0 || e.x < -60 || e.x > w + 60 || e.y > h + 60){
+      estrellaFugaz = null;
+      return;
+    }
+    ctx.save();
+    ctx.globalAlpha = e.vida;
+    ctx.strokeStyle = 'rgba(255,245,220,0.9)';
+    ctx.lineWidth = 2;
+    ctx.shadowColor = 'rgba(255,215,0,0.8)';
+    ctx.shadowBlur = 8;
+    ctx.beginPath();
+    ctx.moveTo(e.x, e.y);
+    ctx.lineTo(e.x - e.vx * 4, e.y - e.vy * 4);
+    ctx.stroke();
+    ctx.restore();
+  }
+
   function tick(){
     ctx.clearRect(0,0,w,h);
     ctx.globalCompositeOperation = 'lighter';
@@ -1191,6 +1286,7 @@
         if(p.y < -10) Object.assign(p, spawn(true));
       }
     }
+    dibujarEstrellaFugaz();
     requestAnimationFrame(tick);
   }
   tick();
